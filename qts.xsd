@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ !
+ ! Some notes to the XSD:
+ !
+ ! The location element is set as optional since it was introduced first in Qt 4.2.
+ ! The userdata element is set as optional since it was introduced first in Qt 4.4.
+ ! The vanished message type was introduced first in Qt 5.2.
+ !
+  -->
+<xs:schema elementFormDefault="qualified"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="TS" type="TS" />
+
+  <xs:complexType name="TS">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="extra-something" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="dependencies" type="dependencies" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="context" type="context" />
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="message" type="message" /> 
+    </xs:sequence>
+    <xs:attribute name="version" type="xs:string" />
+    <xs:attribute name="sourcelanguage" type="xs:string" />
+    <xs:attribute name="language" type="xs:string" />
+  </xs:complexType>
+
+  <!-- value contains decimal (e.g. 1000) or hex (e.g. x3e8) unicode encoding of one char -->
+
+    
+  <xs:complexType name="byte-type">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType> 
+ 
+    <xs:complexType name="context">
+      <xs:sequence>
+        <xs:element name="name" type="xs:string" />
+        <xs:element minOccurs="0" maxOccurs="1" name="comment" type="xs:string" />
+        <xs:element minOccurs="1" maxOccurs="unbounded" name="message" type="message"/>
+      </xs:sequence>
+      <xs:attribute name="encoding" type="xs:string" />
+    </xs:complexType> 
+
+  <xs:complexType name="dependencies">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="dependency" type="dependency" />
+    </xs:sequence>
+  </xs:complexType>  
+
+  <xs:complexType name="dependency">
+    <xs:attribute name="catalog" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="message">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="location" type="location" />
+      <xs:element minOccurs="0" maxOccurs="1" name="source" type="xs:string"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="oldsource" type="xs:string"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="comment" type="xs:string"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="oldcomment" type="xs:string"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="extracomment" type="xs:string"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="translatorcomment" type="xs:string"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="translation" type="translation"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="userdata" type="xs:string"/>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="extra-something" type="xs:string" />
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:string" />
+    <xs:attribute default="no" name="numerus">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="yes" />
+          <xs:enumeration value="no" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  <!--
+   ! If the line is omitted, the location specifies only a file.
+   !
+   ! location supports relative specifications as well. Line numbers are
+   ! relative (explicitly positive or negative) to the last reference to a
+   ! given filename; each file starts with current line 0. If the filename
+   ! is omitted, the "current" one is used. For the 1st location in a message,
+   ! "current" is the filename used for the 1st location of the previous message.
+   ! For subsequent locations, it is the filename used for the previous location.
+   ! A single TS file has either all absolute or all relative locations.
+    --> 
+  <xs:complexType name="location">
+    <xs:attribute name="filename" type="xs:string" />
+    <xs:attribute name="line" type="xs:int" />
+  </xs:complexType> 
+   
+    <xs:complexType name="translation"> 
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+          <xs:element name="text" type="xs:string" />
+          <xs:element name="numerusform" type="xs:string" />
+          <xs:element name="lengthvariant" type="xs:string" />
+        </xs:choice> 
+      <!--
+       ! If no type is set, the message is "finished".
+       ! Length variants must be ordered by falling display length.
+       ! variants may not be yes if the message has numerus yes.
+        -->
+      <xs:attribute name="type">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="unfinished" />
+            <xs:enumeration value="vanished" />
+            <xs:enumeration value="obsolete" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute default="no" name="variants">
+        <xs:simpleType>
+          <xs:restriction base="xs:token">
+            <xs:enumeration value="yes" />
+            <xs:enumeration value="no" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+    
+  <xs:complexType name="numerusform" mixed="true">
+    <xs:choice minOccurs="0" maxOccurs="unbounded"> 
+      <xs:element name="lengthvariant" type="xs:string" />
+    </xs:choice>
+    <xs:attribute default="no" name="variants">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="yes" />
+          <xs:enumeration value="no" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType> 
+  <xs:element name="lengthvariant" type="byte-type"/>
+</xs:schema>
