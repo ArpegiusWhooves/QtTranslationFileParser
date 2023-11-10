@@ -1,7 +1,8 @@
 
 
+use std::env;
 
-use miette::{IntoDiagnostic, Context};
+use miette::{IntoDiagnostic, Context,miette};
 
 use quick_xml::{Reader, events::Event}; 
 
@@ -13,9 +14,12 @@ enum Tag {
 }
 
 
+
+
 fn main() -> miette::Result<()> {
 
-    let xml = load_file("en_GB.ts")?;
+    let xml = load_file( env::args().skip(1).next()
+        .ok_or_else(||miette!("Argument 1 should be filename!"))?.as_str() )?;
 
     let mut reader = Reader::from_str(&xml);
     reader.trim_text(true);
